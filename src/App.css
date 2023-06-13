@@ -1,0 +1,39 @@
+.container {
+  display: flex;
+}
+
+.sidebar {
+  background-color: #f2f2f2;
+  padding: 10px;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar input[type="text"]{
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar input[type="file"]{
+  width: 75px;
+  size:0px;
+  padding: 10px;
+  padding-left: 0px;
+}
+.graph-container {
+  flex-grow: 1;
+  padding: 5px;
+}
