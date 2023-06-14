@@ -1,6 +1,5 @@
 import ForceGraph3D  from 'react-force-graph-3d';
-const { useState, useMemo, useCallback } = React;
-
+import React, { useState, useMemo,useCallback } from 'react';
 const ExpandableGraph = ({ graphData }) => {
     const rootId = "0";
 

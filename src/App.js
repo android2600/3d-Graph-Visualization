@@ -6,7 +6,7 @@ import './App.css'
 const App = () => {
   const [selectedId, setSelectedId] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [graphData,setGraphData]=useState(null);
+  const [graphData,setGraphData]=useState(JSON.parse(JSON.stringify(data)));
   const [filteredData, setFilteredData] = useState();
   const [isSearching, setIsSearching] = useState(false);
 
@@ -66,6 +66,7 @@ const App = () => {
     };
 
     setFilteredData(updatedData);
+    console.log(filteredData)
     setIsSearching(false);
   };
 
