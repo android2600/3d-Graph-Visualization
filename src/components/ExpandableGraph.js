@@ -1,4 +1,5 @@
 import ForceGraph3D  from 'react-force-graph-3d';
+//import SpriteText from 'three-spritetext';
 import React, { useState, useMemo,useCallback } from 'react';
 const ExpandableGraph = ({ graphData }) => {
     const rootId = "0";
@@ -36,6 +37,7 @@ const ExpandableGraph = ({ graphData }) => {
     const handleNodeClick = useCallback(node => {
       node.collapsed = !node.collapsed; // toggle collapse state
       setPrunedTree(getPrunedTree())
+      // eslint-disable-next-line
     }, []);
 
     return <ForceGraph3D
@@ -44,6 +46,7 @@ const ExpandableGraph = ({ graphData }) => {
         node.fx=node.x;
         node.fy=node.y;
         node.fz=node.z;}}
+      nodeLabel={node=>node.id}
       onNodeClick={handleNodeClick}
     />;
   };

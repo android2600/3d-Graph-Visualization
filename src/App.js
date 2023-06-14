@@ -1,96 +1,96 @@
-import React, { useState,useEffect } from 'react';
-import ExpandableGraph from './components/ExpandableGraph'
-import data from './data_source/output.json'
-import './App.css'
+import React, { useState, useMemo, useCallback} from 'react';
+import ForceGraph3D  from 'react-force-graph-3d';
+import data from "./data_source/output.json"
 
 const App = () => {
-  const [selectedId, setSelectedId] = useState('');
+  const [graphData, setGraphData] = useState(data);
+  const [filteredData, setFilteredData] = useState(JSON.parse(JSON.stringify(graphData)));
+  const [selectedId, setSelectedId] = useState('0');
+  const [temp,setTemp]=useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [graphData,setGraphData]=useState(JSON.parse(JSON.stringify(data)));
-  const [filteredData, setFilteredData] = useState();
-  const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-        setUploadedFile(JSON.parse(JSON.stringify(data)));
-        setGraphData(JSON.parse(JSON.stringify(data)));
-  }, []);
-
-  
-  const readFileContents = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = (e) => reject(e.target.error);
-      reader.readAsText(file);
-    });
-  };
-
-  const handleFileUpload = async (event) => {
+  const handleFileUpload = (event) => {
     const file = event.target.files[0];
+    setUploadedFile(file);
     if (file) {
-      const contents = await readFileContents(file);
-      const jsonData = JSON.parse(contents);
-      console.log(jsonData)
-      setUploadedFile(JSON.parse(JSON.stringify(jsonData)));
-    }
-  };
-  
-  const handleSearchButtonClick = () => {
-    setIsSearching(true);
-    setGraphData(JSON.parse(JSON.stringify(uploadedFile)))
-    console.log(graphData)
-    let filteredLinks = [];
-    for (let i = 0; i < graphData.links.length; i++) {
-      let link = graphData.links[i];
-      if (String(link.source) === selectedId) {
-        filteredLinks.push(link);
-      }
-    }
-    let requiredNodeIds = [selectedId];
-    for (let i = 0; i < filteredLinks.length; i++) {
-      let link = filteredLinks[i];
-      requiredNodeIds.push(String(link.target));
-    }
-  
-    let filteredNodes = [];
-    for (let i = 0; i < graphData.nodes.length; i++) {
-      let node = graphData.nodes[i];
-      if (requiredNodeIds.includes(String(node.id))) {
-        filteredNodes.push(node);
-      }
-    }
-
-    let updatedData = {
-      nodes: filteredNodes,
-      links: filteredLinks,
+      const reader = new FileReader();
+      reader.onload = () => {
+        const contents = reader.result;
+        const jsonData = JSON.parse(contents);
+        setGraphData(jsonData);
+        setFilteredData(JSON.parse(JSON.stringify(jsonData)));
+      };
+      reader.readAsText(file);
     };
-
-    setFilteredData(updatedData);
-    console.log(filteredData)
-    setIsSearching(false);
   };
 
-  const handleSearchChange = (event) => {
-    setSelectedId(event.target.value);
+  const handleSearch = () => {
+    setSelectedId(temp);
+    setFilteredData(JSON.parse(JSON.stringify(graphData)))
   };
 
+  const nodesById = useMemo(() => {
+    const nodesById = {};
+    filteredData.nodes.forEach(node => {
+      nodesById[node.id] = { ...node, collapsed: node.id !== selectedId, childLinks: [] };
+    });
+    filteredData.links.forEach(link => {
+      nodesById[link.source].childLinks.push(link);
+    });
+    return nodesById;
+    // eslint-disable-next-line
+  }, [filteredData]);
+
+  const getPrunedTree = useCallback(() => {
+    const visibleNodes = [];
+    const visibleLinks = [];
+    const traverseTree = (node) => {
+      visibleNodes.push(node);
+      if (node.collapsed) return;
+      visibleLinks.push(...node.childLinks);
+      node.childLinks.forEach(link => {
+        const childNode = typeof link.target === 'object' ? link.target : nodesById[link.target];
+        traverseTree(childNode);
+      });
+    };
+    traverseTree(nodesById[selectedId]);
+    return { nodes: visibleNodes, links: visibleLinks };
+    // eslint-disable-next-line
+  }, [nodesById]);
+
+  const [prunedTree, setPrunedTree] = useState(getPrunedTree());
+
+  const handleNodeClick = useCallback(node => {
+    node.collapsed = !node.collapsed;
+    setPrunedTree(getPrunedTree());
+  }, [getPrunedTree]);
+  
   return (
-    <div className="container">
-      <div className="sidebar">
+    <div>
+      <div>
+        <input type="file" accept=".json" onChange={handleFileUpload} />
+        {uploadedFile && <span>File uploaded: {uploadedFile.name}</span>}
         <input
-          type="text"
-          value={selectedId}
-          onChange={handleSearchChange}
-          placeholder="Search..."
+        type="text"
+        value={temp}
+        onChange={(e) => setTemp(e.target.value)}
+        placeholder="Search.."
         />
-        <button onClick={handleSearchButtonClick} disabled={isSearching}>Search</button>
-        <input type="file" accept=".json" onChange={handleFileUpload} title=''/>
+      <button onClick={handleSearch}>Search</button>
       </div>
-      <div className="graph-container">
-      <ExpandableGraph graphData={graphData}/>
-      </div>
-  </div>
+        <ForceGraph3D
+        graphData={prunedTree}
+        onNodeClick={handleNodeClick}
+        nodeLabel={node=>node.id}
+        onNodeDragEnd={node => {
+          node.fx = node.x;
+          node.fy = node.y;
+          node.fz = node.z;
+        }}
+        />
+    </div>
   );
 };
 
 export default App;
+
