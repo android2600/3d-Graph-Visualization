@@ -2,7 +2,7 @@ import ForceGraph3D  from 'react-force-graph-3d';
 const { useState, useMemo, useCallback } = React;
 
 const ExpandableGraph = ({ graphData }) => {
-    const rootId = 0;
+    const rootId = "0";
 
     const nodesById = useMemo(() => {
       const nodesById = Object.fromEntries(graphData.nodes.map(node => [node.id, node]));

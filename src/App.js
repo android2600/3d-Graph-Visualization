@@ -86,7 +86,7 @@ const App = () => {
         <input type="file" accept=".json" onChange={handleFileUpload} title=''/>
       </div>
       <div className="graph-container">
-      <ExpandableGraph graphData={filteredData}/>
+      <ExpandableGraph graphData={graphData}/>
       </div>
   </div>
   );
