@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import ForceGraph3D  from 'react-force-graph-3d';
+import ExpandableGraph from './components/ExpandableGraph'
 import data from './data_source/output.json'
 import './App.css'
 
@@ -86,12 +86,7 @@ const App = () => {
         <input type="file" accept=".json" onChange={handleFileUpload} title=''/>
       </div>
       <div className="graph-container">
-      <ForceGraph3D graphData={filteredData} 
-      onNodeDragEnd={node=>{
-        node.fx=node.x;
-        node.fy=node.y;
-        node.fz=node.z;}}
-        />
+      <ExpandableGraph graphData={filteredData}/>
       </div>
   </div>
   );
